@@ -10,6 +10,7 @@
         _Red ("Red", Range(0, 1)) = 0.5
         _Green ("Green", Range(0, 1)) = 0.5
         _Blue ("Blue", Range(0, 1)) = 0.5
+        _BrightDark ("Bright & Dark", Range(-1, 1)) = 0
     }
     SubShader
     {
@@ -37,6 +38,7 @@
         float _Red;
         float _Green;
         float _Blue;
+        float _BrightDark;
 
         // Add instancing support for this shader. You need to check 'Enable Instancing' on materials that use the shader.
         // See https://docs.unity3d.com/Manual/GPUInstancing.html for more information about instancing.
@@ -55,7 +57,7 @@
             float2 gg = float2(0.5, 0);
             o.Albedo = float3(0, gg);
             o.Albedo = _TestColor.rgb;
-            o.Albedo = float3(_Red, _Green, _Blue);
+            o.Albedo = float3(_Red, _Green, _Blue) + _BrightDark;
             // o.Albedo = c.rgb;
             // Metallic and smoothness come from slider variables
             o.Metallic = _Metallic;
