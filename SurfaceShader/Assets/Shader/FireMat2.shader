@@ -1,9 +1,11 @@
-﻿Shader "Custom/FireMat"
+﻿Shader "Custom/FireMat2"
 {
     Properties
     {
         _MainTex ("Albedo (RGB)", 2D) = "white" {}
-        _MainTex2 ("Albedo (RGB)", 2D) = "white" {}
+        _MainTex2 ("Albedo (RGB)", 2D) = "black" {}
+        _YGap ("Y Gap", Range(0, 1)) = 0.035
+        _Noise ("Noise", Range(0, 1)) = 0.59
     }
     SubShader
     {
@@ -14,11 +16,10 @@
         // Physically based Standard lighting model, and enable shadows on all light types
         #pragma surface surf Standard fullforwardshadows alpha:fade
 
-        // Use shader model 3.0 target, to get nicer looking lighting
-        #pragma target 3.0
-
         sampler2D _MainTex;
         sampler2D _MainTex2;
+        float _YGap;
+        float _Noise;
 
         struct Input
         {
@@ -36,10 +37,10 @@
         void surf (Input IN, inout SurfaceOutputStandard o)
         {
             // Albedo comes from a texture tinted by color
-            fixed4 c = tex2D (_MainTex, IN.uv_MainTex);
-            fixed4 c2 = tex2D (_MainTex2, float2(IN.uv_MainTex2.x, IN.uv_MainTex2.y - _Time.y));
-            o.Emission = c.rgb * c2.rgb;
-            o.Alpha = c.a * c2.a;
+            fixed4 d = tex2D (_MainTex2, float2(IN.uv_MainTex2.x, IN.uv_MainTex2.y - _Time.y));
+            fixed4 c = tex2D (_MainTex, float2(IN.uv_MainTex.x, IN.uv_MainTex.y - _YGap) + d.r * _Noise); // 각 이미지 픽셀 위치 값을 다른 이미지의 red 칼라 크기 만큼 더한 위치로 이동시켜 렌더링
+            o.Albedo = c.rgb;
+            o.Alpha = c.a;
         }
         ENDCG
     }
