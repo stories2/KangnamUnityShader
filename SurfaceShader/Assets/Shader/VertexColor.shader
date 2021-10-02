@@ -6,6 +6,9 @@
         _MainTex2 ("Albedo (RGB)", 2D) = "white" {}
         _MainTex3 ("Albedo (RGB)", 2D) = "white" {}
         _MainTex4 ("Albedo (RGB)", 2D) = "white" {}
+        _BumpMap ("Bump map", 2D) = "white" {}
+        _Glossiness ("Smoothness", Range(0, 1)) = 0.5
+        _Metallic ("Metallic", Range(0, 1)) = 0.0
     }
     SubShader
     {
@@ -23,6 +26,7 @@
         sampler2D _MainTex2;
         sampler2D _MainTex3;
         sampler2D _MainTex4;
+        sampler2D _BumpMap;
 
         struct Input
         {
@@ -30,8 +34,12 @@
             float2 uv_MainTex2;
             float2 uv_MainTex3;
             float2 uv_MainTex4;
+            float2 uv_BumpMap;
             float4 color:COLOR; // FBX 파일에 저장된 컬러 값을 가져옴
         };
+
+        half _Glossiness;
+        half _Metallic;
 
         // Add instancing support for this shader. You need to check 'Enable Instancing' on materials that use the shader.
         // See https://docs.unity3d.com/Manual/GPUInstancing.html for more information about instancing.
@@ -53,6 +61,9 @@
             o.Albedo = lerp(o.Albedo, c3.rgb, IN.color.g);
             o.Albedo = lerp(o.Albedo, c4.rgb, IN.color.b);
             // o.Emission = IN.color.rgb;
+            o.Normal = UnpackNormal(tex2D(_BumpMap, IN.uv_BumpMap)) * 3;
+            o.Metallic = _Metallic;
+            o.Smoothness = IN.color.b * _Glossiness + 0.3;
             o.Alpha = c.a;
         }
         ENDCG

@@ -2,11 +2,10 @@
 {
     Properties
     {
-        _Color ("Color", Color) = (1,1,1,1)
         _MainTex ("Albedo (RGB)", 2D) = "white" {}
-        _Glossiness ("Smoothness", Range(0,1)) = 0.5
-        _Metallic ("Metallic", Range(0,1)) = 0.0
-        _NormalMap ("NormalMap", 2D) = "white" {}
+        _NormalMap ("NormalMap", 2D) = "bump" {}
+        _Occlusion ("Occlusion", 2D) = "white" {}
+        _Specular ("Specular", 2D) = "white" {}
     }
     SubShader
     {
@@ -21,15 +20,17 @@
         #pragma target 3.0
 
         sampler2D _MainTex;
+        sampler2D _NormalMap;
+        sampler2D _Occlusion;
+        sampler2D _Specular;
 
         struct Input
         {
             float2 uv_MainTex;
+            float2 uv_NormalMap;
+            float2 uv_Occlusion;
+            float2 uv_Specular;
         };
-
-        half _Glossiness;
-        half _Metallic;
-        fixed4 _Color;
 
         // Add instancing support for this shader. You need to check 'Enable Instancing' on materials that use the shader.
         // See https://docs.unity3d.com/Manual/GPUInstancing.html for more information about instancing.
@@ -41,11 +42,14 @@
         void surf (Input IN, inout SurfaceOutputStandard o)
         {
             // Albedo comes from a texture tinted by color
-            fixed4 c = tex2D (_MainTex, IN.uv_MainTex) * _Color;
+            fixed4 c = tex2D (_MainTex, IN.uv_MainTex);
+            float4 ao = tex2D (_Occlusion, IN.uv_Occlusion);
+            float3 n = UnpackNormal(tex2D (_NormalMap, IN.uv_NormalMap));
+            float4 s = tex2D(_Specular, IN.uv_Specular);
             o.Albedo = c.rgb;
-            // Metallic and smoothness come from slider variables
-            o.Metallic = _Metallic;
-            o.Smoothness = _Glossiness;
+            o.Normal = float3(n.x * 2, n.y * 2, n.z);
+            o.Metallic = s * 3;
+            o.Occlusion = ao;
             o.Alpha = c.a;
         }
         ENDCG
