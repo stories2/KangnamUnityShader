@@ -49,6 +49,9 @@
             fixed4 c4 = tex2D (_MainTex4, IN.uv_MainTex4);
             // o.Albedo = c.rgb * IN.color.rgb;
             o.Albedo = IN.color.rgb;
+            o.Albedo = lerp(c.rgb, c2.rgb, IN.color.r);
+            o.Albedo = lerp(o.Albedo, c3.rgb, IN.color.g);
+            o.Albedo = lerp(o.Albedo, c4.rgb, IN.color.b);
             // o.Emission = IN.color.rgb;
             o.Alpha = c.a;
         }
