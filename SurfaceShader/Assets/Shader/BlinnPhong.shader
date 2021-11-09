@@ -45,8 +45,10 @@
         {
             // Albedo comes from a texture tinted by color
             fixed4 c = tex2D (_MainTex, IN.uv_MainTex) * _Color;
-            o.Normal = UnpackNormal(tex2D (_NormalTex, IN.uv_NormalTex));
+            float4 n = tex2D (_NormalTex, IN.uv_NormalTex);
+            o.Normal = UnpackNormal(n);
             o.Albedo = c.rgb;
+            o.Gloss = n.a;
             // Metallic and smoothness come from slider variables
             // o.Metallic = _Metallic;
             // o.Smoothness = _Glossiness;
@@ -64,7 +66,7 @@
 
             float3 halfVec = normalize(lightDir + viewDir);
             float3 specular = saturate(dot(halfVec, s.Normal));
-            return float4(pow(specular, 100), 1);
+            return float4(pow(specular, 100) * s.Gloss, 1);
 
             float4 final;
             final.rgb = nDotL * s.Albedo * _LightColor0.rgb * atten;
