@@ -6,6 +6,7 @@
         _MainTex ("Albedo (RGB)", 2D) = "white" {}
         _Glossiness ("Smoothness", Range(0,1)) = 0.5
         _Metallic ("Metallic", Range(0,1)) = 0.0
+        _NormalTex ("Normal", 2D) = "white" {}
     }
     SubShader
     {
@@ -65,16 +66,18 @@
         // 2-pass
         CGPROGRAM
         // Physically based Standard lighting model, and enable shadows on all light types
-        #pragma surface surf Lambert
+        #pragma surface surf Toon noambient
 
         // Use shader model 3.0 target, to get nicer looking lighting
         #pragma target 3.0
 
         sampler2D _MainTex;
+        sampler2D _NormalTex;
 
         struct Input
         {
             float2 uv_MainTex;
+            float2 uv_NormalTex;
         };
 
         half _Glossiness;
@@ -92,9 +95,25 @@
         {
             // Albedo comes from a texture tinted by color
             fixed4 c = tex2D (_MainTex, IN.uv_MainTex) * _Color;
+            o.Normal = UnpackNormal(tex2D(_NormalTex, IN.uv_NormalTex));
             o.Albedo = c.rgb;
             // Metallic and smoothness come from slider variables
             o.Alpha = c.a;
+        }
+
+        float4 LightingToon (SurfaceOutput s, float3 lightDir, float atten) {
+            // half lambert
+            float nDotL = dot(s.Normal, lightDir) * 0.5 + 0.5;
+            // if (nDotL > 0.7) nDotL = 1.0;
+            // else if (nDotL > 0.4) nDotL = 0.3;
+            // else nDotL = 0.0;
+            nDotL = nDotL * 5;
+            nDotL = ceil(nDotL) / 5;
+
+            float4 final;
+            final.rgb = s.Albedo * nDotL * _LightColor0.rgb;
+            final.a = s.Alpha;
+            return final;
         }
         ENDCG
     }
