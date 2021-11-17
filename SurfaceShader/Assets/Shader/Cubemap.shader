@@ -5,6 +5,7 @@
         _MainTex ("Albedo (RGB)", 2D) = "white" {}
         _Cube ("Cube map", Cube) = "" {}
         _NormalTex ("Normal", 2D) = "white" {}
+        _MaskMap ("Mask map", 2D) = "white" {}
     }
     SubShader
     {
@@ -13,7 +14,7 @@
 
         CGPROGRAM
         // Physically based Standard lighting model, and enable shadows on all light types
-        #pragma surface surf Lambert noambient
+        #pragma surface surf Lambert 
 
         // Use shader model 3.0 target, to get nicer looking lighting
         #pragma target 3.0
@@ -21,12 +22,14 @@
         sampler2D _MainTex;
         samplerCUBE _Cube;
         sampler2D _NormalTex;
+        sampler2D _MaskMap;
 
         struct Input
         {
             float2 uv_MainTex;
             float3 worldRefl;
             float2 uv_NormalTex;
+            float2 uv_MaskMap;
             float3 worldNormal;
             INTERNAL_DATA
             //vertex normal data -> pixel normal data 변환 행렬 
@@ -59,8 +62,10 @@
             // Normal vec 를 반환함, INTERNAL_DATA 를 써야 픽셀 노말이 반환 
             o.Emission = pixelNormal;
 
-            o.Albedo = c.rgb * .5;
-            o.Emission = re.rgb * .5;
+            float4 m = tex2D(_MaskMap, IN.uv_MaskMap);
+            o.Albedo = c.rgb * (1 - m.r);
+            // c.rgb 를 쓸 것인지, mask 맵을 쓸 것인지 리니어하게 결정
+            o.Emission = re.rgb * .5 * m.r;
             o.Alpha = c.a;
         }
         ENDCG
