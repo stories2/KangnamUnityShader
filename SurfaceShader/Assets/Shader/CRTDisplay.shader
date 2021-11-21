@@ -6,8 +6,10 @@
         _crt_curv_scale ("CRT Curv scale", Range(0, 1)) = 0.5
         _crt_curv_scale2 ("CRT Curv scale2", Range(0, 10)) = 4
         _crt_curv_scale3 ("CRT Curv scale3", Range(0, 5)) = 1.3
+        _crt_curv_scale4 ("CRT Curv scale4", Range(0, 5)) = 1.13
         _crt_size ("CRT Size", Range(0, 5)) = 1.1
         _crt_pow ("CRT POW", Range(1, 10)) = 1
+        _RoundedCornerTex ("Rounded coner", 2D) = "white" {}
     }
     SubShader
     {
@@ -22,16 +24,19 @@
         #pragma target 3.0
 
         sampler2D _MainTex;
+        sampler2D _RoundedCornerTex;
 
         struct Input
         {
             float2 uv_MainTex;
+            float2 uv_RoundedCornerTex;
             float3 viewDir;
         };
 
         float _crt_curv_scale;
         float _crt_curv_scale2;
         float _crt_curv_scale3;
+        float _crt_curv_scale4;
         float _crt_size;   
         float _crt_pow;     
 
@@ -96,26 +101,26 @@
         float convertCurvedPosY2 (int quadrant, float x) {
             switch(quadrant) {
                 case 1:
-                    return tan(x) * _crt_curv_scale;
+                    return tan(x * _crt_curv_scale4) * _crt_curv_scale;
                 case 2:
-                    return -tan(x) * _crt_curv_scale;
+                    return -tan(x * _crt_curv_scale4) * _crt_curv_scale;
                 case 3:
-                    return tan(x) * _crt_curv_scale;
+                    return tan(x * _crt_curv_scale4) * _crt_curv_scale;
                 case 4:
-                    return -tan(x) * _crt_curv_scale;
+                    return -tan(x * _crt_curv_scale4) * _crt_curv_scale;
             }
         }
 
         float convertCurvedPosX2 (int quadrant, float y) {
             switch(quadrant) {
                 case 1:
-                    return tan(y) * _crt_curv_scale;
+                    return tan(y * _crt_curv_scale4) * _crt_curv_scale;
                 case 2:
-                    return -tan(y) * _crt_curv_scale;
+                    return -tan(y * _crt_curv_scale4) * _crt_curv_scale;
                 case 3:
-                    return -tan(y) * _crt_curv_scale;
+                    return -tan(y * _crt_curv_scale4) * _crt_curv_scale;
                 case 4:
-                    return tan(y) * _crt_curv_scale;
+                    return tan(y * _crt_curv_scale4) * _crt_curv_scale;
             }
         }
 
@@ -162,7 +167,8 @@
         {
             // Albedo comes from a texture tinted by color
             fixed4 c = tex2D (_MainTex, crtCurveDisplay4(IN.uv_MainTex)) ; //crtCurveDisplay(IN.uv_MainTex)
-            o.Albedo = c.rgb;
+            fixed4 roundedConer = tex2D (_RoundedCornerTex, IN.uv_RoundedCornerTex);
+            o.Albedo = c.rgb * roundedConer.a;
             // Metallic and smoothness come from slider variables
             o.Alpha = c.a;
         }

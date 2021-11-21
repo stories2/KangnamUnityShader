@@ -55,6 +55,10 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _RoundedCornerTex:
+        m_Texture: {fileID: 2800000, guid: 1f90dbd9edc4c4fca8f77991016b8238, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     m_Floats:
     - _BumpScale: 1
     - _Cutoff: 0.5
@@ -72,9 +76,11 @@ Material:
     - _SrcBlend: 1
     - _UVSec: 0
     - _ZWrite: 1
-    - _crt_curv_scale: 0.5
+    - _crt_curv_scale: 0.924
     - _crt_curv_scale2: 4
     - _crt_curv_scale3: 1.3
+    - _crt_curv_scale4: 1.13
+    - _crt_pow: 1.1
     - _crt_size: 1.1
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
