@@ -7,6 +7,7 @@
         _crt_curv_scale2 ("CRT Curv scale2", Range(0, 10)) = 4
         _crt_curv_scale3 ("CRT Curv scale3", Range(0, 5)) = 1.3
         _crt_size ("CRT Size", Range(0, 5)) = 1.1
+        _crt_pow ("CRT POW", Range(1, 10)) = 1
     }
     SubShader
     {
@@ -31,7 +32,8 @@
         float _crt_curv_scale;
         float _crt_curv_scale2;
         float _crt_curv_scale3;
-        float _crt_size;        
+        float _crt_size;   
+        float _crt_pow;     
 
         // Add instancing support for this shader. You need to check 'Enable Instancing' on materials that use the shader.
         // See https://docs.unity3d.com/Manual/GPUInstancing.html for more information about instancing.
@@ -78,7 +80,67 @@
             } else {
                 quadrant = 4;
             }
-            return float2((abs(convertCurvedPosX(quadrant, alignCenter.y)) / 2 + 0.5) * uv.x, (abs(convertCurvedPosY(quadrant, alignCenter.x)) / 2 + 0.5) * uv.y);
+            float2 pos = float2(convertCurvedPosX(quadrant, alignCenter.y), convertCurvedPosY(quadrant, alignCenter.x));
+            pos = pow(pos, 2);
+            return float2((abs(pos.x) / 2 + 0.5) * uv.x, (abs(pos.y) / 2 + 0.5) * uv.y);
+        }
+
+        float2 crtCurveDisplay2 (float2 uv) {
+            return pow(abs(uv * 2 - 1) / 1, 2) + uv;
+        }
+
+        float2 crtCurveDisplay3 (float uv) {
+            return uv * 3.1415;
+        }
+
+        float convertCurvedPosY2 (int quadrant, float x) {
+            switch(quadrant) {
+                case 1:
+                    return tan(x) * _crt_curv_scale;
+                case 2:
+                    return -tan(x) * _crt_curv_scale;
+                case 3:
+                    return tan(x) * _crt_curv_scale;
+                case 4:
+                    return -tan(x) * _crt_curv_scale;
+            }
+        }
+
+        float convertCurvedPosX2 (int quadrant, float y) {
+            switch(quadrant) {
+                case 1:
+                    return tan(y) * _crt_curv_scale;
+                case 2:
+                    return -tan(y) * _crt_curv_scale;
+                case 3:
+                    return -tan(y) * _crt_curv_scale;
+                case 4:
+                    return tan(y) * _crt_curv_scale;
+            }
+        }
+
+        float2 crtCurveDisplay4 (float2 uv) {
+            float2 alignCenter = float2(uv.x * 2 - 1, uv.y * 2 - 1);
+            float quadrant = 1;
+            if (alignCenter.x > 0 && alignCenter.y > 0) {
+                quadrant = 1;
+                float2 pos = float2(convertCurvedPosX2(quadrant, alignCenter.x), convertCurvedPosY2(quadrant, alignCenter.y));
+                return float2(pow(abs(pos.x), _crt_pow) / 2 + 0.5, pow(abs(pos.y), _crt_pow) / 2 + 0.5);
+            } else if (alignCenter.x < 0 && alignCenter.y > 0) {
+                quadrant = 2;
+                float2 pos = float2(convertCurvedPosX2(quadrant, alignCenter.x), convertCurvedPosY2(quadrant, alignCenter.y));
+                return float2(1 - (pow(abs(pos.x), _crt_pow) / 2 + 0.5), pow(abs(pos.y), _crt_pow) / 2 + 0.5);
+            } else if (alignCenter.x < 0 && alignCenter.y < 0) {
+                quadrant = 3;
+                float2 pos = float2(convertCurvedPosX2(quadrant, alignCenter.x), convertCurvedPosY2(quadrant, alignCenter.y));
+                return float2(1 - (pow(abs(pos.x), _crt_pow) / 2 + 0.5), 1 - (pow(abs(pos.y), _crt_pow) / 2 + 0.5));
+            } else {
+                quadrant = 4;
+                float2 pos = float2(convertCurvedPosX2(quadrant, alignCenter.x), convertCurvedPosY2(quadrant, alignCenter.y));
+                return float2(pow(abs(pos.x), _crt_pow) / 2 + 0.5, 1 - (pow(abs(pos.y), _crt_pow) / 2 + 0.5));
+            }
+            float2 pos = float2(convertCurvedPosX2(quadrant, alignCenter.x), convertCurvedPosY2(quadrant, alignCenter.y));
+            return float2(pow(abs(pos.x), _crt_pow) / 2 + 0.5, pow(abs(pos.y), _crt_pow) / 2 + 0.5);
         }
 
         float2 testDisplay (float2 uv) {
@@ -99,7 +161,7 @@
         void surf (Input IN, inout SurfaceOutput o)
         {
             // Albedo comes from a texture tinted by color
-            fixed4 c = tex2D (_MainTex, crtCurveDisplay(IN.uv_MainTex)) ; //crtCurveDisplay(IN.uv_MainTex)
+            fixed4 c = tex2D (_MainTex, crtCurveDisplay4(IN.uv_MainTex)) ; //crtCurveDisplay(IN.uv_MainTex)
             o.Albedo = c.rgb;
             // Metallic and smoothness come from slider variables
             o.Alpha = c.a;
