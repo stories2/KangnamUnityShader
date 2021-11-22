@@ -81,7 +81,8 @@ Material:
     - _crt_curv_scale2: 4
     - _crt_curv_scale3: 1.3
     - _crt_curv_scale4: 1.13
-    - _crt_pow: 4.66
+    - _crt_curv_scale5: 1.19
+    - _crt_pow: 1
     - _crt_size: 1.1
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}

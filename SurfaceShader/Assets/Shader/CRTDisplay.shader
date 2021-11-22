@@ -8,6 +8,7 @@
         _crt_curv_scale3 ("CRT Curv scale3", Range(0, 5)) = 1.3
         _crt_curv_scale4 ("CRT Curv scale4", Range(0, 5)) = 1.13
         _crt_curv_scale5 ("CRT Curv scale5", Range(-5, 5)) = 0.5
+        _crt_curv_scale6 ("CRT Curv scale6", Range(0, 2)) = 1
 
         _crt_curv_horizontal ("CRT Curv Horizontal", Range(1, 5)) = 2
         _crt_size ("CRT Size", Range(0, 5)) = 1.1
@@ -41,6 +42,7 @@
         float _crt_curv_scale3;
         float _crt_curv_scale4;
         float _crt_curv_scale5;
+        float _crt_curv_scale6;
         float _crt_curv_horizontal;
         float _crt_size;   
         float _crt_pow;     
@@ -201,6 +203,70 @@
                 );
         }
 
+        float converter2 (float x) {
+            return tan(x * 1.4) * _crt_curv_scale6;
+        }
+
+        float convertCurvedPosY4 (int quadrant, float x) {
+            switch(quadrant) {
+                case 1:
+                    return converter2(x);
+                case 2:
+                    return -converter2(x);
+                case 3:
+                    return converter2(x);
+                case 4:
+                    return -converter2(x);
+            }
+        }
+
+        float convertCurvedPosX4 (int quadrant, float y) {
+            switch(quadrant) {
+                case 1:
+                    return converter2(y);
+                case 2:
+                    return -converter2(y);
+                case 3:
+                    return converter2(y);
+                case 4:
+                    return -converter2(y);
+            }
+        }
+
+        float2 crtCurveDisplay6 (float2 uv) {
+            float2 alignCenter = float2(uv.x * 2 - 1, uv.y * 2 - 1);
+            float quadrant = 1;
+            if (alignCenter.x > 0 && alignCenter.y > 0) {
+                quadrant = 1;
+            return float2(
+                    (1 + convertCurvedPosY4(quadrant, alignCenter.x)) / 2, 
+                    (1 + convertCurvedPosX4(quadrant, alignCenter.y)) / 2
+                );
+            } else if (alignCenter.x < 0 && alignCenter.y > 0) {
+                quadrant = 2;
+            return float2(
+                    (1 - convertCurvedPosY4(quadrant, alignCenter.x)) / 2, 
+                    (1 - convertCurvedPosX4(quadrant, alignCenter.y)) / 2
+                );
+            } else if (alignCenter.x < 0 && alignCenter.y < 0) {
+                quadrant = 3;
+            return float2(
+                    (1 + convertCurvedPosY4(quadrant, alignCenter.x)) / 2, 
+                    (1 + convertCurvedPosX4(quadrant, alignCenter.y)) / 2
+                );
+            } else {
+                quadrant = 4;
+            return float2(
+                    (1 - convertCurvedPosY4(quadrant, alignCenter.x)) / 2, 
+                    (1 - convertCurvedPosX4(quadrant, alignCenter.y)) / 2
+                );
+            }
+            return float2(
+                    (1 + convertCurvedPosY4(quadrant, alignCenter.x)) / 2, 
+                    (1 + convertCurvedPosX4(quadrant, alignCenter.y)) / 2
+                );
+        }
+
         float2 testDisplay (float2 uv) {
             float2 alignCenter = float2(uv.x * 2 - 1, uv.y * 2 - 1);
             float quadrant = 1;
@@ -219,7 +285,7 @@
         void surf (Input IN, inout SurfaceOutput o)
         {
             // Albedo comes from a texture tinted by color
-            fixed4 c = tex2D (_MainTex, crtCurveDisplay5(IN.uv_MainTex)) ; //crtCurveDisplay(IN.uv_MainTex)
+            fixed4 c = tex2D (_MainTex, crtCurveDisplay5(crtCurveDisplay6(IN.uv_MainTex))) ; //crtCurveDisplay(IN.uv_MainTex)
             fixed4 roundedConer = tex2D (_RoundedCornerTex, IN.uv_RoundedCornerTex);
             o.Albedo = c.rgb * roundedConer.a;
             // Metallic and smoothness come from slider variables
