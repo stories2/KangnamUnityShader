@@ -281,11 +281,21 @@
             }
             return float2((convertCurvedPosX(quadrant, alignCenter.y) / 2 + 0.5) * uv.x, uv.y);
         }
+
+        // https://www.shadertoy.com/view/XtlSD7
+        float2 CRTCurveUV( float2 uv )
+        {
+            uv = uv * 2.0 - 1;
+            float2 offset = abs( uv.yx ) / float2( 5, 2 );
+            uv = uv + uv * offset * offset;
+            uv = uv * 0.5 + 0.5;
+            return uv;
+        }
         
         void surf (Input IN, inout SurfaceOutput o)
         {
             // Albedo comes from a texture tinted by color
-            fixed4 c = tex2D (_MainTex, crtCurveDisplay5(crtCurveDisplay6(IN.uv_MainTex))) ; //crtCurveDisplay(IN.uv_MainTex)
+            fixed4 c = tex2D (_MainTex, crtCurveDisplay6(CRTCurveUV(IN.uv_MainTex))) ; //crtCurveDisplay(IN.uv_MainTex)
             fixed4 roundedConer = tex2D (_RoundedCornerTex, IN.uv_RoundedCornerTex);
             o.Albedo = c.rgb * roundedConer.a;
             // Metallic and smoothness come from slider variables
