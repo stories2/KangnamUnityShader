@@ -7,6 +7,7 @@
         _crt_curv_scale2 ("CRT Curv scale2", Range(0, 10)) = 4
         _crt_curv_scale3 ("CRT Curv scale3", Range(0, 5)) = 1.3
         _crt_curv_scale4 ("CRT Curv scale4", Range(0, 5)) = 1.13
+        _crt_curv_horizontal ("CRT Curv Horizontal", Range(1, 5)) = 2
         _crt_size ("CRT Size", Range(0, 5)) = 1.1
         _crt_pow ("CRT POW", Range(1, 10)) = 1
         _RoundedCornerTex ("Rounded coner", 2D) = "white" {}
@@ -37,6 +38,7 @@
         float _crt_curv_scale2;
         float _crt_curv_scale3;
         float _crt_curv_scale4;
+        float _crt_curv_horizontal;
         float _crt_size;   
         float _crt_pow;     
 
@@ -130,22 +132,22 @@
             if (alignCenter.x > 0 && alignCenter.y > 0) {
                 quadrant = 1;
                 float2 pos = float2(convertCurvedPosX2(quadrant, alignCenter.x), convertCurvedPosY2(quadrant, alignCenter.y));
-                return float2(pow(abs(pos.x), _crt_pow) / 2 + 0.5, pow(abs(pos.y), _crt_pow) / 2 + 0.5);
+                return float2(pow(abs(pos.x), _crt_pow) / _crt_curv_horizontal + 0.5, pow(abs(pos.y), _crt_pow) / _crt_curv_horizontal + 0.5);
             } else if (alignCenter.x < 0 && alignCenter.y > 0) {
                 quadrant = 2;
                 float2 pos = float2(convertCurvedPosX2(quadrant, alignCenter.x), convertCurvedPosY2(quadrant, alignCenter.y));
-                return float2(1 - (pow(abs(pos.x), _crt_pow) / 2 + 0.5), pow(abs(pos.y), _crt_pow) / 2 + 0.5);
+                return float2(1 - (pow(abs(pos.x), _crt_pow) / _crt_curv_horizontal + 0.5), pow(abs(pos.y), _crt_pow) / _crt_curv_horizontal + 0.5);
             } else if (alignCenter.x < 0 && alignCenter.y < 0) {
                 quadrant = 3;
                 float2 pos = float2(convertCurvedPosX2(quadrant, alignCenter.x), convertCurvedPosY2(quadrant, alignCenter.y));
-                return float2(1 - (pow(abs(pos.x), _crt_pow) / 2 + 0.5), 1 - (pow(abs(pos.y), _crt_pow) / 2 + 0.5));
+                return float2(1 - (pow(abs(pos.x), _crt_pow) / _crt_curv_horizontal + 0.5), 1 - (pow(abs(pos.y), _crt_pow) / _crt_curv_horizontal + 0.5));
             } else {
                 quadrant = 4;
                 float2 pos = float2(convertCurvedPosX2(quadrant, alignCenter.x), convertCurvedPosY2(quadrant, alignCenter.y));
-                return float2(pow(abs(pos.x), _crt_pow) / 2 + 0.5, 1 - (pow(abs(pos.y), _crt_pow) / 2 + 0.5));
+                return float2(pow(abs(pos.x), _crt_pow) / _crt_curv_horizontal + 0.5, 1 - (pow(abs(pos.y), _crt_pow) / _crt_curv_horizontal + 0.5));
             }
             float2 pos = float2(convertCurvedPosX2(quadrant, alignCenter.x), convertCurvedPosY2(quadrant, alignCenter.y));
-            return float2(pow(abs(pos.x), _crt_pow) / 2 + 0.5, pow(abs(pos.y), _crt_pow) / 2 + 0.5);
+            return float2(pow(abs(pos.x), _crt_pow) / _crt_curv_horizontal + 0.5, pow(abs(pos.y), _crt_pow) / _crt_curv_horizontal + 0.5);
         }
 
         float2 testDisplay (float2 uv) {
