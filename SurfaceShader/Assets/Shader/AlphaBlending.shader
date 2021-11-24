@@ -2,17 +2,19 @@
 {
     Properties
     {
+        _Color ("Main Color", Color) = (1, 1, 1, 1)
         _MainTex ("Albedo (RGB)", 2D) = "white" {}
+        _Cutoff ("Alpha cutoff", Range(0, 1)) = 0.5
     }
     SubShader
     {
-        Tags { "RenderType"="Transparent" "Queue"="Transparent" }
+        Tags { "RenderType"="TransparentCutout" "Queue"="AlphaTest" }
         // Opaque 불투명
         LOD 200
 
         CGPROGRAM
         // Physically based Standard lighting model, and enable shadows on all light types
-        #pragma surface surf Lambert alpha:fade
+        #pragma surface surf Lambert alphatest:_Cutoff
 
         // Use shader model 3.0 target, to get nicer looking lighting
         #pragma target 3.0
@@ -41,8 +43,9 @@
         }
         ENDCG
     }
-    FallBack "Legacy Shaders/Transparent/VertexLit"
+    FallBack "Legacy Shaders/Transparent/Cutout/VertexLit"
     // Diffuse 기본 모양으로 그림자 생성, 알파 값 영향 X
     // Legacy Shaders/Transparent/VertexLit 그림자 삭제
+    // Legacy Shaders/Transparent/Cutout/VertexLit alphatesting 적용
 
 }
