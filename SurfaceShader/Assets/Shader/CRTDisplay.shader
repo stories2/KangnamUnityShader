@@ -16,6 +16,9 @@
         _crt_pixel_alpha_split_g ("CRT Alpha Split G", Range(1, 10)) = 3
         _crt_pixel_alpha_split_b ("CRT Alpha Split B", Range(1, 10)) = 3
 
+        _crt_pixel_line_routine ("CRT Pixel line routine", Range(100, 1000)) = 500
+        _crt_pixel_line_threshold ("CRT Pixel threshold", Range(0.7, 1)) = 0.9
+
         _crt_curv_horizontal ("CRT Curv Horizontal", Range(1, 5)) = 2
         _crt_size ("CRT Size", Range(0, 5)) = 1.1
         _crt_pow ("CRT POW", Range(-10, 10)) = 1
@@ -84,6 +87,8 @@
         float _crt_curv_scale6;
         float _crt_pixel_gap;
         float _crt_pixel_alpha_split_r;
+        float _crt_pixel_line_routine;
+        float _crt_pixel_line_threshold;
         float _crt_curv_horizontal;
         float _crt_size;   
         float _crt_pow;     
@@ -349,7 +354,10 @@
             fixed4 c = tex2D (_MainTex, crtCurveDisplay6(CRTCurveUV(IN.uv_MainTex))) ; //crtCurveDisplay(IN.uv_MainTex)
             fixed4 curvTex = tex2D (_CurvTex, IN.uv_CurvTex);
             fixed4 roundedConer = tex2D (_RoundedCornerTex, IN.uv_RoundedCornerTex);
-            o.Albedo = float3(c.r, 0, 0) * roundedConer.a;
+            
+            // Albedo comes from a texture tinted by color
+            float pixelLine = sin(crtCurveDisplay6(CRTCurveUV(IN.uv_MainTex)).y * 3.141592653 * _crt_pixel_line_routine);
+            o.Albedo = pixelLine > _crt_pixel_line_threshold ? float3(0, 0, 0) : float3(c.r, 0, 0) * roundedConer.a;
             // Metallic and smoothness come from slider variables
             o.Alpha = 1;
         }
@@ -391,6 +399,8 @@
         float _crt_curv_scale6;
         float _crt_pixel_gap;
         float _crt_pixel_alpha_split_g;
+        float _crt_pixel_line_routine;
+        float _crt_pixel_line_threshold;
         float _crt_curv_horizontal;
         float _crt_size;   
         float _crt_pow;     
@@ -492,7 +502,10 @@
             fixed4 c = tex2D (_MainTex, crtCurveDisplay6(CRTCurveUV(IN.uv_MainTex))) ; //crtCurveDisplay(IN.uv_MainTex)
             fixed4 curvTex = tex2D (_CurvTex, IN.uv_CurvTex);
             fixed4 roundedConer = tex2D (_RoundedCornerTex, IN.uv_RoundedCornerTex);
-            o.Albedo = float3(0, c.g, 0) * roundedConer.a;
+            
+            // Albedo comes from a texture tinted by color
+            float pixelLine = sin(crtCurveDisplay6(CRTCurveUV(IN.uv_MainTex)).y * 3.141592653 * _crt_pixel_line_routine);
+            o.Albedo = pixelLine > _crt_pixel_line_threshold ? float3(0, 0, 0) : float3(0, c.g, 0) * roundedConer.a;
             // Metallic and smoothness come from slider variables
             o.Alpha = 1;
         }
@@ -534,6 +547,8 @@
         float _crt_curv_scale6;
         float _crt_pixel_gap;
         float _crt_pixel_alpha_split_b;
+        float _crt_pixel_line_routine;
+        float _crt_pixel_line_threshold;
         float _crt_curv_horizontal;
         float _crt_size;   
         float _crt_pow;     
@@ -635,9 +650,16 @@
             fixed4 c = tex2D (_MainTex, crtCurveDisplay6(CRTCurveUV(IN.uv_MainTex))) ; //crtCurveDisplay(IN.uv_MainTex)
             fixed4 curvTex = tex2D (_CurvTex, IN.uv_CurvTex);
             fixed4 roundedConer = tex2D (_RoundedCornerTex, IN.uv_RoundedCornerTex);
-            o.Albedo = float3(0, 0, c.b) * roundedConer.a;
+            
+            // Albedo comes from a texture tinted by color
+            float pixelLine = sin(crtCurveDisplay6(CRTCurveUV(IN.uv_MainTex)).y * 3.141592653 * _crt_pixel_line_routine);
+            o.Albedo = pixelLine > _crt_pixel_line_threshold ? float3(0, 0, 0) : float3(0, 0, c.b) * roundedConer.a;
             // Metallic and smoothness come from slider variables
             o.Alpha = 1;
+
+            // o.Albedo = float3(0, 0, c.b) * roundedConer.a;
+            // Metallic and smoothness come from slider variables
+            // o.Alpha = 1;
         }
 
         float4 LightingTest (SurfaceOutput s, float3 lightDir, float3 viewDir, float atten) {
