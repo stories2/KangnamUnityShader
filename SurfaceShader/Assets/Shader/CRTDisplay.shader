@@ -357,7 +357,7 @@
             
             // Albedo comes from a texture tinted by color
             float pixelLine = sin(crtCurveDisplay6(CRTCurveUV(IN.uv_MainTex)).y * 3.141592653 * _crt_pixel_line_routine);
-            o.Albedo = pixelLine > _crt_pixel_line_threshold ? float3(0, 0, 0) : float3(c.r, 0, 0) * roundedConer.a;
+            o.Emission = pixelLine > _crt_pixel_line_threshold ? float3(0, 0, 0) : float3(c.r, 0, 0) * roundedConer.a;
             // Metallic and smoothness come from slider variables
             o.Alpha = 1;
         }
@@ -505,7 +505,7 @@
             
             // Albedo comes from a texture tinted by color
             float pixelLine = sin(crtCurveDisplay6(CRTCurveUV(IN.uv_MainTex)).y * 3.141592653 * _crt_pixel_line_routine);
-            o.Albedo = pixelLine > _crt_pixel_line_threshold ? float3(0, 0, 0) : float3(0, c.g, 0) * roundedConer.a;
+            o.Emission = pixelLine > _crt_pixel_line_threshold ? float3(0, 0, 0) : float3(0, c.g, 0) * roundedConer.a;
             // Metallic and smoothness come from slider variables
             o.Alpha = 1;
         }
@@ -653,7 +653,7 @@
             
             // Albedo comes from a texture tinted by color
             float pixelLine = sin(crtCurveDisplay6(CRTCurveUV(IN.uv_MainTex)).y * 3.141592653 * _crt_pixel_line_routine);
-            o.Albedo = pixelLine > _crt_pixel_line_threshold ? float3(0, 0, 0) : float3(0, 0, c.b) * roundedConer.a;
+            o.Emission = pixelLine > _crt_pixel_line_threshold ? float3(0, 0, 0) : float3(0, 0, c.b) * roundedConer.a;
             // Metallic and smoothness come from slider variables
             o.Alpha = 1;
 

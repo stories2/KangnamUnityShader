@@ -88,10 +88,12 @@ Material:
     - _crt_curv_scale5: 0.57
     - _crt_curv_scale6: 0.46
     - _crt_pixel_alpha_split: 2.55
-    - _crt_pixel_alpha_split_b: 3
-    - _crt_pixel_alpha_split_g: 2.2
-    - _crt_pixel_alpha_split_r: 1.5
+    - _crt_pixel_alpha_split_b: 2.94
+    - _crt_pixel_alpha_split_g: 2.01
+    - _crt_pixel_alpha_split_r: 1.28
     - _crt_pixel_gap: 55.4
+    - _crt_pixel_line_routine: 804
+    - _crt_pixel_line_threshold: 0.983
     - _crt_pow: 1
     - _crt_size: 1.1
     m_Colors:
