@@ -3,12 +3,18 @@
     Properties
     {
         _MainTex ("Albedo (RGB)", 2D) = "white" {}
+        _CurvTex ("Curv texture", 2D) = "white" {}
         _crt_curv_scale ("CRT Curv scale", Range(0, 5)) = 0.5
         _crt_curv_scale2 ("CRT Curv scale2", Range(0, 10)) = 4
         _crt_curv_scale3 ("CRT Curv scale3", Range(0, 5)) = 1.3
         _crt_curv_scale4 ("CRT Curv scale4", Range(0, 5)) = 1.13
         _crt_curv_scale5 ("CRT Curv scale5", Range(-5, 5)) = 0.5
         _crt_curv_scale6 ("CRT Curv scale6", Range(0, 2)) = 1
+
+        _crt_pixel_gap ("CRT Pixel gap", Range(1, 100)) = 1.6
+        _crt_pixel_alpha_split_r ("CRT Alpha Split R", Range(1, 10)) = 3
+        _crt_pixel_alpha_split_g ("CRT Alpha Split G", Range(1, 10)) = 3
+        _crt_pixel_alpha_split_b ("CRT Alpha Split B", Range(1, 10)) = 3
 
         _crt_curv_horizontal ("CRT Curv Horizontal", Range(1, 5)) = 2
         _crt_size ("CRT Size", Range(0, 5)) = 1.1
@@ -17,22 +23,55 @@
     }
     SubShader
     {
-        Tags { "RenderType"="Transparent" "Queue"="Transparent" }
+        Tags { "RenderType"="Queue"}
         LOD 200
 
         CGPROGRAM
         // Physically based Standard lighting model, and enable shadows on all light types
-        #pragma surface surf Test fullforwardshadows noambient alpha:fade
+        #pragma surface surf Lambert noambient 
+
+        // Use shader model 3.0 target, to get nicer looking lighting
+        #pragma target 3.0
+
+        struct Input
+        {
+            float2 uv_MainTex;
+        };
+
+        // Add instancing support for this shader. You need to check 'Enable Instancing' on materials that use the shader.
+        // See https://docs.unity3d.com/Manual/GPUInstancing.html for more information about instancing.
+        // #pragma instancing_options assumeuniformscaling
+        UNITY_INSTANCING_BUFFER_START(Props)
+            // put more per-instance properties here
+        UNITY_INSTANCING_BUFFER_END(Props)
+        
+        void surf (Input IN, inout SurfaceOutput o)
+        {
+            // Albedo comes from a texture tinted by color
+            // o.Albedo = float3(0, 0, 0);
+            // o.Alpha = 1;
+        }
+
+        float4 LightingTest (SurfaceOutput s, float3 lightDir, float3 viewDir, float atten) {
+            return float4(1, 1, 1, 1);
+        }
+        ENDCG
+
+        CGPROGRAM
+        // Physically based Standard lighting model, and enable shadows on all light types
+        #pragma surface surf Test fullforwardshadows noambient alpha:fade vertex:vert
 
         // Use shader model 3.0 target, to get nicer looking lighting
         #pragma target 3.0
 
         sampler2D _MainTex;
+        sampler2D _CurvTex;
         sampler2D _RoundedCornerTex;
 
         struct Input
         {
             float2 uv_MainTex;
+            float2 uv_CurvTex;
             float2 uv_RoundedCornerTex;
             float3 viewDir;
         };
@@ -43,6 +82,8 @@
         float _crt_curv_scale4;
         float _crt_curv_scale5;
         float _crt_curv_scale6;
+        float _crt_pixel_gap;
+        float _crt_pixel_alpha_split_r;
         float _crt_curv_horizontal;
         float _crt_size;   
         float _crt_pow;     
@@ -53,6 +94,16 @@
         UNITY_INSTANCING_BUFFER_START(Props)
             // put more per-instance properties here
         UNITY_INSTANCING_BUFFER_END(Props)
+
+        void vert(inout appdata_full v) {
+            // v.vertex.z += sin(_Time.y) * 0.1 * v.color.r;
+            // v.vertex.y = v.vertex.y + v.color.a;
+            // y\ =\ \sin\left(\ x\ \cdot\ \pi\right)\ \cdot\frac{1}{5}+0.8
+            // v.vertex.x = v.vertex.x + 1;
+            // v.vertex.y = sin(v.vertex.y * 3.1415926) * (1 / 5) + 0.8;
+            v.vertex.x -= 0.03 * (1 / _crt_pixel_gap) - 0.015;
+            v.vertex.z += 0.01;
+        }
         
         float convertCurvedPosY (int quadrant, float x) {
             switch(quadrant) {
@@ -296,10 +347,11 @@
         {
             // Albedo comes from a texture tinted by color
             fixed4 c = tex2D (_MainTex, crtCurveDisplay6(CRTCurveUV(IN.uv_MainTex))) ; //crtCurveDisplay(IN.uv_MainTex)
+            fixed4 curvTex = tex2D (_CurvTex, IN.uv_CurvTex);
             fixed4 roundedConer = tex2D (_RoundedCornerTex, IN.uv_RoundedCornerTex);
-            o.Albedo = c.rgb * roundedConer.a;
+            o.Albedo = float3(c.r, 0, 0) * roundedConer.a;
             // Metallic and smoothness come from slider variables
-            o.Alpha = c.a;
+            o.Alpha = 1;
         }
 
         float4 LightingTest (SurfaceOutput s, float3 lightDir, float3 viewDir, float atten) {
@@ -308,7 +360,293 @@
             // _LightColor0 조명의 강도, 색상
             // atten 조명과 본 사물간 거리가 멀면 조명이 약할것이고 가까우면 강할 것
             final.a = s.Alpha;
-            return final;
+            return float4(final.r, 0, 0, final.a / _crt_pixel_alpha_split_r);
+        }
+        ENDCG
+
+        CGPROGRAM
+        // Physically based Standard lighting model, and enable shadows on all light types
+        #pragma surface surf Test fullforwardshadows noambient alpha:fade vertex:vert
+
+        // Use shader model 3.0 target, to get nicer looking lighting
+        #pragma target 3.0
+
+        sampler2D _MainTex;
+        sampler2D _CurvTex;
+        sampler2D _RoundedCornerTex;
+
+        struct Input
+        {
+            float2 uv_MainTex;
+            float2 uv_CurvTex;
+            float2 uv_RoundedCornerTex;
+            float3 viewDir;
+        };
+
+        float _crt_curv_scale;
+        float _crt_curv_scale2;
+        float _crt_curv_scale3;
+        float _crt_curv_scale4;
+        float _crt_curv_scale5;
+        float _crt_curv_scale6;
+        float _crt_pixel_gap;
+        float _crt_pixel_alpha_split_g;
+        float _crt_curv_horizontal;
+        float _crt_size;   
+        float _crt_pow;     
+
+        // Add instancing support for this shader. You need to check 'Enable Instancing' on materials that use the shader.
+        // See https://docs.unity3d.com/Manual/GPUInstancing.html for more information about instancing.
+        // #pragma instancing_options assumeuniformscaling
+        UNITY_INSTANCING_BUFFER_START(Props)
+            // put more per-instance properties here
+        UNITY_INSTANCING_BUFFER_END(Props)
+
+        void vert(inout appdata_full v) {
+            // v.vertex.z += sin(_Time.y) * 0.1 * v.color.r;
+            // v.vertex.y = v.vertex.y + v.color.a;
+            // y\ =\ \sin\left(\ x\ \cdot\ \pi\right)\ \cdot\frac{1}{5}+0.8
+            // v.vertex.x = v.vertex.x + 1;
+            // v.vertex.y = sin(v.vertex.y * 3.1415926) * (1 / 5) + 0.8;
+            v.vertex.x -= 0.02 * (1 / _crt_pixel_gap) - 0.015;
+            v.vertex.z += 0.02;
+        }
+
+        float converter2 (float x) {
+            return tan(x * 1.4) * _crt_curv_scale6;
+        }
+
+        float convertCurvedPosY4 (int quadrant, float x) {
+            switch(quadrant) {
+                case 1:
+                    return converter2(x);
+                case 2:
+                    return -converter2(x);
+                case 3:
+                    return converter2(x);
+                case 4:
+                    return -converter2(x);
+            }
+        }
+
+        float convertCurvedPosX4 (int quadrant, float y) {
+            switch(quadrant) {
+                case 1:
+                    return converter2(y);
+                case 2:
+                    return -converter2(y);
+                case 3:
+                    return converter2(y);
+                case 4:
+                    return -converter2(y);
+            }
+        }
+
+        float2 crtCurveDisplay6 (float2 uv) {
+            float2 alignCenter = float2(uv.x * 2 - 1, uv.y * 2 - 1);
+            float quadrant = 1;
+            if (alignCenter.x > 0 && alignCenter.y > 0) {
+                quadrant = 1;
+            return float2(
+                    (1 + convertCurvedPosY4(quadrant, alignCenter.x)) / 2, 
+                    (1 + convertCurvedPosX4(quadrant, alignCenter.y)) / 2
+                );
+            } else if (alignCenter.x < 0 && alignCenter.y > 0) {
+                quadrant = 2;
+            return float2(
+                    (1 - convertCurvedPosY4(quadrant, alignCenter.x)) / 2, 
+                    (1 - convertCurvedPosX4(quadrant, alignCenter.y)) / 2
+                );
+            } else if (alignCenter.x < 0 && alignCenter.y < 0) {
+                quadrant = 3;
+            return float2(
+                    (1 + convertCurvedPosY4(quadrant, alignCenter.x)) / 2, 
+                    (1 + convertCurvedPosX4(quadrant, alignCenter.y)) / 2
+                );
+            } else {
+                quadrant = 4;
+            return float2(
+                    (1 - convertCurvedPosY4(quadrant, alignCenter.x)) / 2, 
+                    (1 - convertCurvedPosX4(quadrant, alignCenter.y)) / 2
+                );
+            }
+            return float2(
+                    (1 + convertCurvedPosY4(quadrant, alignCenter.x)) / 2, 
+                    (1 + convertCurvedPosX4(quadrant, alignCenter.y)) / 2
+                );
+        }
+
+        // https://www.shadertoy.com/view/XtlSD7
+        float2 CRTCurveUV( float2 uv )
+        {
+            uv = uv * 2.0 - 1;
+            float2 offset = abs( uv.yx ) / float2( 5, 2 );
+            uv = uv + uv * offset * offset;
+            uv = uv * 0.5 + 0.5;
+            return uv;
+        }
+        
+        void surf (Input IN, inout SurfaceOutput o)
+        {
+            // Albedo comes from a texture tinted by color
+            fixed4 c = tex2D (_MainTex, crtCurveDisplay6(CRTCurveUV(IN.uv_MainTex))) ; //crtCurveDisplay(IN.uv_MainTex)
+            fixed4 curvTex = tex2D (_CurvTex, IN.uv_CurvTex);
+            fixed4 roundedConer = tex2D (_RoundedCornerTex, IN.uv_RoundedCornerTex);
+            o.Albedo = float3(0, c.g, 0) * roundedConer.a;
+            // Metallic and smoothness come from slider variables
+            o.Alpha = 1;
+        }
+
+        float4 LightingTest (SurfaceOutput s, float3 lightDir, float3 viewDir, float atten) {
+            float4 final;
+            final.rgb = s.Albedo * _LightColor0.rgb * atten;
+            // _LightColor0 조명의 강도, 색상
+            // atten 조명과 본 사물간 거리가 멀면 조명이 약할것이고 가까우면 강할 것
+            final.a = s.Alpha;
+            return float4(0, final.g, 0, final.a / _crt_pixel_alpha_split_g);
+        }
+        ENDCG
+
+        CGPROGRAM
+        // Physically based Standard lighting model, and enable shadows on all light types
+        #pragma surface surf Test fullforwardshadows noambient alpha:fade vertex:vert
+
+        // Use shader model 3.0 target, to get nicer looking lighting
+        #pragma target 3.0
+
+        sampler2D _MainTex;
+        sampler2D _CurvTex;
+        sampler2D _RoundedCornerTex;
+
+        struct Input
+        {
+            float2 uv_MainTex;
+            float2 uv_CurvTex;
+            float2 uv_RoundedCornerTex;
+            float3 viewDir;
+        };
+
+        float _crt_curv_scale;
+        float _crt_curv_scale2;
+        float _crt_curv_scale3;
+        float _crt_curv_scale4;
+        float _crt_curv_scale5;
+        float _crt_curv_scale6;
+        float _crt_pixel_gap;
+        float _crt_pixel_alpha_split_b;
+        float _crt_curv_horizontal;
+        float _crt_size;   
+        float _crt_pow;     
+
+        // Add instancing support for this shader. You need to check 'Enable Instancing' on materials that use the shader.
+        // See https://docs.unity3d.com/Manual/GPUInstancing.html for more information about instancing.
+        // #pragma instancing_options assumeuniformscaling
+        UNITY_INSTANCING_BUFFER_START(Props)
+            // put more per-instance properties here
+        UNITY_INSTANCING_BUFFER_END(Props)
+
+        void vert(inout appdata_full v) {
+            // v.vertex.z += sin(_Time.y) * 0.1 * v.color.r;
+            // v.vertex.y = v.vertex.y + v.color.a;
+            // y\ =\ \sin\left(\ x\ \cdot\ \pi\right)\ \cdot\frac{1}{5}+0.8
+            // v.vertex.x = v.vertex.x + 1;
+            // v.vertex.y = sin(v.vertex.y * 3.1415926) * (1 / 5) + 0.8;
+            v.vertex.x -= 0.01 * (1 / _crt_pixel_gap) - 0.015;
+            v.vertex.z += 0.03;
+        }
+
+        float converter2 (float x) {
+            return tan(x * 1.4) * _crt_curv_scale6;
+        }
+
+        float convertCurvedPosY4 (int quadrant, float x) {
+            switch(quadrant) {
+                case 1:
+                    return converter2(x);
+                case 2:
+                    return -converter2(x);
+                case 3:
+                    return converter2(x);
+                case 4:
+                    return -converter2(x);
+            }
+        }
+
+        float convertCurvedPosX4 (int quadrant, float y) {
+            switch(quadrant) {
+                case 1:
+                    return converter2(y);
+                case 2:
+                    return -converter2(y);
+                case 3:
+                    return converter2(y);
+                case 4:
+                    return -converter2(y);
+            }
+        }
+
+        float2 crtCurveDisplay6 (float2 uv) {
+            float2 alignCenter = float2(uv.x * 2 - 1, uv.y * 2 - 1);
+            float quadrant = 1;
+            if (alignCenter.x > 0 && alignCenter.y > 0) {
+                quadrant = 1;
+            return float2(
+                    (1 + convertCurvedPosY4(quadrant, alignCenter.x)) / 2, 
+                    (1 + convertCurvedPosX4(quadrant, alignCenter.y)) / 2
+                );
+            } else if (alignCenter.x < 0 && alignCenter.y > 0) {
+                quadrant = 2;
+            return float2(
+                    (1 - convertCurvedPosY4(quadrant, alignCenter.x)) / 2, 
+                    (1 - convertCurvedPosX4(quadrant, alignCenter.y)) / 2
+                );
+            } else if (alignCenter.x < 0 && alignCenter.y < 0) {
+                quadrant = 3;
+            return float2(
+                    (1 + convertCurvedPosY4(quadrant, alignCenter.x)) / 2, 
+                    (1 + convertCurvedPosX4(quadrant, alignCenter.y)) / 2
+                );
+            } else {
+                quadrant = 4;
+            return float2(
+                    (1 - convertCurvedPosY4(quadrant, alignCenter.x)) / 2, 
+                    (1 - convertCurvedPosX4(quadrant, alignCenter.y)) / 2
+                );
+            }
+            return float2(
+                    (1 + convertCurvedPosY4(quadrant, alignCenter.x)) / 2, 
+                    (1 + convertCurvedPosX4(quadrant, alignCenter.y)) / 2
+                );
+        }
+
+        // https://www.shadertoy.com/view/XtlSD7
+        float2 CRTCurveUV( float2 uv )
+        {
+            uv = uv * 2.0 - 1;
+            float2 offset = abs( uv.yx ) / float2( 5, 2 );
+            uv = uv + uv * offset * offset;
+            uv = uv * 0.5 + 0.5;
+            return uv;
+        }
+        
+        void surf (Input IN, inout SurfaceOutput o)
+        {
+            // Albedo comes from a texture tinted by color
+            fixed4 c = tex2D (_MainTex, crtCurveDisplay6(CRTCurveUV(IN.uv_MainTex))) ; //crtCurveDisplay(IN.uv_MainTex)
+            fixed4 curvTex = tex2D (_CurvTex, IN.uv_CurvTex);
+            fixed4 roundedConer = tex2D (_RoundedCornerTex, IN.uv_RoundedCornerTex);
+            o.Albedo = float3(0, 0, c.b) * roundedConer.a;
+            // Metallic and smoothness come from slider variables
+            o.Alpha = 1;
+        }
+
+        float4 LightingTest (SurfaceOutput s, float3 lightDir, float3 viewDir, float atten) {
+            float4 final;
+            final.rgb = s.Albedo * _LightColor0.rgb * atten;
+            // _LightColor0 조명의 강도, 색상
+            // atten 조명과 본 사물간 거리가 멀면 조명이 약할것이고 가까우면 강할 것
+            final.a = s.Alpha;
+            return float4(0, 0, final.b, final.a / _crt_pixel_alpha_split_b);
         }
         ENDCG
     }

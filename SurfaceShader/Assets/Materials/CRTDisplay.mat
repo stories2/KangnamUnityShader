@@ -23,6 +23,10 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _CurvTex:
+        m_Texture: {fileID: 2800000, guid: a2f5d28e76a5b4c5383b1d56b31a61d2, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _DetailAlbedoMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -83,6 +87,11 @@ Material:
     - _crt_curv_scale4: 1.13
     - _crt_curv_scale5: 0.57
     - _crt_curv_scale6: 0.46
+    - _crt_pixel_alpha_split: 2.55
+    - _crt_pixel_alpha_split_b: 3
+    - _crt_pixel_alpha_split_g: 2.2
+    - _crt_pixel_alpha_split_r: 1.5
+    - _crt_pixel_gap: 55.4
     - _crt_pow: 1
     - _crt_size: 1.1
     m_Colors:
