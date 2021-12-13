@@ -167,25 +167,13 @@
                 // o.Alpha = 0.7;
             }
 
-            if (pixelX % 4 == 0) {
-                o.Emission = float3(c.r * _color_R, 0, 0);
-            } else if (pixelX % 4 == 1) {
-                o.Emission = float3(0, c.g * _color_G, 0);
-            } else if (pixelX % 4 == 2) {
-                o.Emission = float3(0, 0, c.b * _color_B);
-            } else {
-                o.Emission = float3(0, 0, 0);
-            }
-
-            if (pixelY % 4 == 0) {
-                o.Albedo = float3(c.r * _color_R, 0, 0);
-            } else if (pixelY % 4 == 1) {
-                o.Albedo = float3(0, c.g * _color_G, 0);
-            } else if (pixelY % 4 == 2) {
-                o.Albedo = float3(0, 0, c.b * _color_B);
-            } else {
-                o.Albedo = float3(0, 0, 0);
-            }
+            o.Emission = float3(pixelX % 4 == 0 ? c.r * _color_R : 0,
+                                pixelX % 4 == 1 ? c.g * _color_G : 0,
+                                pixelX % 4 == 2 ? c.b * _color_B : 0);
+                                
+            o.Albedo = float3(pixelY % 4 == 0 ? c.r * _color_R : 0,
+                                pixelY % 4 == 1 ? c.g * _color_G : 0,
+                                pixelY % 4 == 2 ? c.b * _color_B : 0);
 
             o.Emission = o.Albedo * o.Emission * roundedConer.rgb * curvTex.rgb + float3(1, 1, 1) * _color_backlight;
             o.Alpha = 1;
