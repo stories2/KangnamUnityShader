@@ -161,7 +161,7 @@
                 ) {
                 // pixelX = pixelX * (sin(_Time.y) * 0.5 + 0.5);
                 // pixelX = uv.x * tan(_Time.y) * _Time.z;
-                c = tex2D (_MainTex, float2(uv.y * (sin(_Time.y * 100) * 0.5 + 0.5), uv.x)) ;
+                c = tex2D (_MainTex, float2(abs(uv.x + cos(_Time.y)) / 2, uv.y)) ;
                 // fixed4 noise = tex2D (_MainTex, float2(x, IN.uv_MainTex.y));
                 // o.Emission = noise.rgb * o.Emission;
                 // o.Alpha = 0.7;
