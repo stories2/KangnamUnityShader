@@ -86,7 +86,7 @@ Material:
     - _ZWrite: 1
     - _color_B: 1
     - _color_G: 1
-    - _color_R: 0.95
+    - _color_R: 1
     - _color_backlight: 0.081
     - _crt_term: 1377696
     - _crt_term2: 318
