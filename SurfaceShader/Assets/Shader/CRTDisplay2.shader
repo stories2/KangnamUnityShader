@@ -175,7 +175,8 @@
                                 pixelY % 4 == 1 ? c.g * _color_G : 0.5,
                                 pixelY % 4 == 2 ? c.b * _color_B : 0.5);
 
-            o.Emission = o.Albedo * o.Emission * roundedConer.rgb * curvTex.rgb + float3(1, 1, 1) * _color_backlight;
+            o.Emission = o.Albedo * o.Emission * curvTex.rgb + float3(1, 1, 1) * _color_backlight;
+            o.Emission = o.Emission * roundedConer.rgb;
             o.Albedo = float3(0, 0, 0);
             o.Alpha = 1;
         }
