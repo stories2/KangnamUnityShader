@@ -1,3 +1,3 @@
 # KangnamUnityShader
 
-![화면-기록-2021-12-14-오후-8 11 50-min](https://user-images.githubusercontent.com/16532326/145988419-95bd9fba-f30c-4e70-8f00-0f31753b3f42.gif)
+![화면-기록-2021-12-14-오후-8 38 12-min](https://user-images.githubusercontent.com/16532326/145992051-8b3e4c9c-3ce1-4e65-8a02-df78ef7987c7.gif)
