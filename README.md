@@ -1,3 +1,3 @@
 # KangnamUnityShader
-Surface shader study
-<img width="1792" alt="스크린샷 2021-11-14 오후 2 27 30" src="https://user-images.githubusercontent.com/16532326/141668893-d7de887f-8429-4087-a051-1f204e87b50b.png">
+
+![화면-기록-2021-12-14-오후-8 11 50-min](https://user-images.githubusercontent.com/16532326/145988419-95bd9fba-f30c-4e70-8f00-0f31753b3f42.gif)
